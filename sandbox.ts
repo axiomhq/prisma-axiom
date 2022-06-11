@@ -1,16 +1,20 @@
 import { PrismaClient } from '@prisma/client'
+import logWithAxiom from './axiom';
 
-const prisma = new PrismaClient()
+const prisma = new PrismaClient({ log: [{ emit: 'event', level: 'query', }] });
+prisma.$use(logWithAxiom);
 
 const main = async () => {
   const users = await prisma.user.findMany({
-    where: {
-      name: {
-        startsWith: 'A',
-      },
+    select: {
+      "id": true,
+      "createdAt": true
     },
+    orderBy: {
+      "name": "asc"
+    },
+    take: 100
   })
-
   console.log('Top users (alphabetical): ', users)
 }
 
