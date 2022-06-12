@@ -4,7 +4,8 @@
   "license": "UNLICENSED",
   "dependencies": {
     "@axiomhq/axiom-node": "^0.4.0",
-    "@prisma/client": "3.12.0"
+    "@prisma/client": "3.12.0",
+    "json-stable-stringify": "^1.0.1"
   },
   "devDependencies": {
     "@types/faker": "5.5.9",

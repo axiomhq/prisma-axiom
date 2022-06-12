@@ -1,5 +1,6 @@
 import { Prisma } from '@prisma/client'
 import AxiomClient, { datasets } from '@axiomhq/axiom-node';
+var stringify = require('json-stable-stringify');
 
 // get env var AXIOM_TOKEN
 const axiomToken = process.env.AXIOM_TOKEN;
@@ -13,7 +14,7 @@ async function logWithAxiom(params: Prisma.MiddlewareParams, next: (params: Pris
     var result = [];
     var err = undefined;
 
-    // if we error out, we want to log the error and send to axiom
+    // if we error, we want to log the error and send to axiom
     try {
         result = await next(params);
     } catch (e) {
@@ -30,19 +31,26 @@ async function logWithAxiom(params: Prisma.MiddlewareParams, next: (params: Pris
                     prisma: {
                         clientVersion: Prisma.prismaVersion.client,
                         durationMs: Date.now() - before,
-                        ...params,
-                        error: err,
-                        resultLength: result ? result.length : undefined
+                        args: stringify(params.args),
+                        model: params.model,
+                        action: params.action,
+                        dataPath: params.dataPath,
+                        runInTransaction: params.runInTransaction,
+                        error: stringify(err),
                     }
                 }]),
                 datasets.ContentType.JSON,
                 datasets.ContentEncoding.Identity
             );
-            console.log(res);
         }
         catch (e) {
             console.error(e);
         }
+    }
+
+    // now throw the error if we had one
+    if (err != undefined) {
+        throw err;
     }
 
     return result;
