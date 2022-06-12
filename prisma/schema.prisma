@@ -2,13 +2,13 @@
 // This schema tracks short links by associating them to a user
 
 generator client {
-  provider = "prisma-client-js"
-  previewFeatures = ["dataProxy", "referentialIntegrity"]
+  provider        = "prisma-client-js"
+  previewFeatures = ["referentialIntegrity"]
 }
 
 datasource db {
-provider = "mysql"
-  url      = env("DATABASE_URL")
+  provider             = "mysql"
+  url                  = env("DATABASE_URL")
   referentialIntegrity = "prisma"
 }
 
