@@ -19,11 +19,6 @@
   "prisma": {
     "seed": "ts-node prisma/seed"
   },
-  "scripts": {
-    "init": "prisma db push && prisma db seed",
-    "dev": "ts-node ./sandbox.ts",
-    "build": "PRISMA_CLIENT_ENGINE_TYPE='dataproxy' prisma generate"
-  },
   "version": "0.1.0alpha1",
   "repository": {
     "type": "git",
