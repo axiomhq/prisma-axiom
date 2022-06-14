@@ -1,7 +1,7 @@
 {
-  "name": "url-shortener",
-  "description": "Schema for a URL shortener with a REST API",
-  "license": "UNLICENSED",
+  "name": "axiom-prisma",
+  "description": "Axiom observability middleware for Prisma",
+  "license": "MIT",
   "dependencies": {
     "@axiomhq/axiom-node": "^0.4.0",
     "@prisma/client": "3.12.0",
@@ -24,8 +24,7 @@
     "dev": "ts-node ./sandbox.ts",
     "build": "PRISMA_CLIENT_ENGINE_TYPE='dataproxy' prisma generate"
   },
-  "version": "1.0.0",
-  "main": "index.js",
+  "version": "0.1.0alpha1",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/seiflotfy/helloprisma.git"

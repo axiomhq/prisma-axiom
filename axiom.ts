@@ -1,10 +1,9 @@
-import { Prisma } from '@prisma/client'
+import { Prisma } from '@prisma/client';
 import AxiomClient, { datasets } from '@axiomhq/axiom-node';
 var stringify = require('json-stable-stringify');
 
-// get env var AXIOM_TOKEN
+// get env var AXIOM_TOKEN and AXIOM_DATASET
 const axiomToken = process.env.AXIOM_TOKEN;
-// get env var AXIOM_DATASET
 const axiomDataset = process.env.AXIOM_DATASET;
 
 const axiom = new AxiomClient(undefined, axiomToken);
@@ -24,7 +23,7 @@ async function logWithAxiom(params: Prisma.MiddlewareParams, next: (params: Pris
     // if axiomDataset is not set don't bother sending to axiom
     if (axiomDataset) {
         try {
-            const res = await axiom.datasets.ingestString(
+            await axiom.datasets.ingestString(
                 axiomDataset,
                 JSON.stringify([{
                     _time: before,
