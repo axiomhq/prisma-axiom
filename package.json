@@ -1,5 +1,5 @@
 {
-  "name": "axiom-prisma",
+  "name": "@axiomhq/axiom-prisma",
   "description": "Axiom observability middleware for Prisma",
   "license": "MIT",
   "dependencies": {
@@ -19,15 +19,25 @@
   "prisma": {
     "seed": "ts-node prisma/seed"
   },
-  "version": "0.1.0alpha1",
+  "version": "0.1.0-alpha1",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/axiom-prisma.git"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "axiom",
+    "prisma",
+    "observability",
+    "middleware",
+    "logging"
+  ],
+  "author": "Seif Lotfy",
   "bugs": {
     "url": "https://github.com/axiom-prisma/issues"
   },
-  "homepage": "https://github.com/axiom-prisma#readme"
+  "homepage": "https://github.com/axiom-prisma#readme",
+  "main": "axiom.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
 }
