@@ -22,12 +22,12 @@
   "version": "0.1.0alpha1",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/seiflotfy/helloprisma.git"
+    "url": "git+https://github.com/axiom-prisma.git"
   },
   "keywords": [],
   "author": "",
   "bugs": {
-    "url": "https://github.com/seiflotfy/helloprisma/issues"
+    "url": "https://github.com/axiom-prisma/issues"
   },
-  "homepage": "https://github.com/seiflotfy/helloprisma#readme"
+  "homepage": "https://github.com/axiom-prisma#readme"
 }
