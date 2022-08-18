@@ -20,6 +20,7 @@ jobs:
         with:
           node-version: 17
       - run: npm install
+      - run: npx prisma generate
       - run: npm run check-format
   unittests:
     name: Check Tests
@@ -30,6 +31,7 @@ jobs:
         with:
           node-version: 17
       - run: npm install
+      - run: npx prisma generate
       - run: npm test
   build:
     name: Build
@@ -46,6 +48,7 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
       - run: npm install
+      - run: npx prisma generate
       - run: npm run build
   publish:
     name: Publish
