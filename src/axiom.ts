@@ -10,7 +10,6 @@ const axiomDataset = process.env.AXIOM_DATASET || "";
 const axiom = new AxiomClient(undefined, axiomToken);
 let events: LogEvent[] = [];
 
-
 const throttledIngest = throttle(_ingest, 1000);
 
 function _ingest() {
@@ -43,7 +42,7 @@ async function logWithAxiom(
 
   const event: LogEvent = {
     _time: before,
-    level: err ? 'error' : 'info',
+    level: err ? "error" : "info",
     prisma: {
       clientVersion: Prisma.prismaVersion.client,
       durationMs: Date.now() - before,
@@ -52,7 +51,7 @@ async function logWithAxiom(
       action: params.action,
       dataPath: params.dataPath,
       runInTransaction: params.runInTransaction,
-      error: err? err.toString() : null,
+      error: err ? err.toString() : null,
     },
   };
 
@@ -64,7 +63,7 @@ async function logWithAxiom(
 
 interface LogEvent {
   _time: number;
-  level: string,
+  level: string;
   prisma: {
     clientVersion: string;
     durationMs: number;
