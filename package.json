@@ -1,5 +1,5 @@
 {
-  "name": "@axiomhq/axiom-prisma",
+  "name": "@axiomhq/prisma-axiom",
   "description": "Axiom observability middleware for Prisma",
   "license": "MIT",
   "dependencies": {
@@ -24,7 +24,7 @@
   "version": "0.1.0-alpha1",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/axiom-prisma.git"
+    "url": "git+https://github.com/axiomhq/prisma-axiom.git"
   },
   "keywords": [
     "axiom",
@@ -39,9 +39,9 @@
     "Islam Shehata <islam@axiom.co>"
   ],
   "bugs": {
-    "url": "https://github.com/axiom-prisma/issues"
+    "url": "https://github.com/axiomhq/prisma-axiom/issues"
   },
-  "homepage": "https://github.com/axiom-prisma#readme",
+  "homepage": "https://github.com/axiomhq/prisma-axiom#readme",
   "main": "axiom.ts",
   "scripts": {
     "build": "tsc",

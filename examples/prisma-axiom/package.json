@@ -1,7 +1,7 @@
 {
   "name": "example",
   "version": "1.0.0",
-  "description": "example on using axiom-prisma",
+  "description": "example on using prisma-axiom",
   "main": "index.js",
   "scripts": {
     "start": "tsc index.ts",
