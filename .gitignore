@@ -3,4 +3,5 @@ dist/
 *.env*
 .vercel
 .vscode/
-**/*.db
+**/*.db*
+**/migrations
