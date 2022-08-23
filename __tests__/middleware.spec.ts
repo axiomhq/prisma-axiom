@@ -3,29 +3,9 @@ process.env.AXIOM_URL = "https://test.co";
 process.env.DATABASE_URL = "file:./test.db";
 
 import { PrismaClient } from "@prisma/client";
-// import axios from 'axios'
-import mockAxios from 'jest-mock-axios';
+import mockAxios from "jest-mock-axios";
 
 import logWithAxiom from "../src/axiom";
-
-
-// jest.mock("axios", () => {
-//   return {
-//     defaults:{
-//       headers:{
-//           common:{
-//               "Content-Type":"",
-//               "Authorization":""
-//           }
-//       }
-// },
-//     post: jest.fn(() => Promise.resolve()),
-//     create: jest.fn(),
-//   };
-// });
-
-// const mockedAxios = axios as jest.Mocked<typeof axios>;
-
 
 describe("Axiom middleware", () => {
   jest.useFakeTimers();
@@ -33,7 +13,7 @@ describe("Axiom middleware", () => {
   const prisma = new PrismaClient();
   prisma.$use(logWithAxiom);
 
-  beforeAll(async () => { });
+  beforeAll(async () => {});
 
   it("Throttles requests to Axiom", async () => {
     await prisma.user.create({
