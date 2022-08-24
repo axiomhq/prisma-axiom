@@ -34,6 +34,8 @@ jobs:
       - run: npx prisma generate
       - run: npx prisma migrate dev
       - run: npm test
+        env:
+          AXIOM_DATASET: prisma-test
   build:
     name: Build
     runs-on: ubuntu-latest
