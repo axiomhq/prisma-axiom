@@ -1,17 +1,22 @@
 // set env vars before importing logger
 process.env.AXIOM_URL = "https://test.co";
+process.env.AXIOM_DATASET = "test";
 process.env.DATABASE_URL = "file:./test.db";
 
 import { PrismaClient } from "@prisma/client";
-import mockAxios from "jest-mock-axios";
+import AxiomClient from "@axiomhq/axiom-node";
 
-import logWithAxiom from "../src/axiom";
+import Axiom from "../src/axiom";
 
 describe("Axiom middleware", () => {
   jest.useFakeTimers();
 
   const prisma = new PrismaClient();
-  prisma.$use(logWithAxiom);
+
+  const client = new AxiomClient();
+
+  const axiom = new Axiom(client);
+  prisma.$use(axiom.middleware);
 
   beforeAll(async () => {});
 
@@ -24,10 +29,10 @@ describe("Axiom middleware", () => {
     });
     await prisma.user.findFirst();
 
-    expect(mockAxios.post).toHaveBeenCalledTimes(0);
+    expect(client.datasets.ingestEvents).toHaveBeenCalledTimes(0);
 
     jest.advanceTimersByTime(1000);
-    expect(mockAxios.post).toHaveBeenCalledTimes(1);
+    expect(client.datasets.ingestEvents).toHaveBeenCalledTimes(1);
   });
 
   afterAll(async () => {

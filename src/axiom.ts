@@ -7,58 +7,67 @@ const stringify = require("json-stable-stringify");
 const axiomToken = process.env.AXIOM_TOKEN;
 const axiomDataset = process.env.AXIOM_DATASET || "";
 
-const axiom = new AxiomClient(undefined, axiomToken);
-let events: LogEvent[] = [];
+class Axiom {
+  client: AxiomClient;
+  throttledIngest = throttle(this._ingest, 1000);
+  events: LogEvent[] = [];
 
-const throttledIngest = throttle(_ingest, 1000);
-
-function _ingest() {
-  axiom.datasets.ingestEvents(axiomDataset, events);
-
-  // clear events
-  events = [];
-}
-
-async function logWithAxiom(
-  params: Prisma.MiddlewareParams,
-  next: (params: Prisma.MiddlewareParams) => Promise<any>
-) {
-  // if axiomDataset is not set don't bother sending to axiom
-  if (!process.env.AXIOM_DATASET) {
-    return await next(params);
+  constructor(client?: AxiomClient) {
+    if (client) {
+      this.client = client;
+    } else {
+      this.client = new AxiomClient(undefined, axiomToken);
+    }
   }
 
-  const before = Date.now();
-  var result = [];
-  var err = undefined;
+  _ingest() {
+    this.client.datasets.ingestEvents(axiomDataset, this.events);
 
-  // if we error, we want to log the error and send to axiom
-  try {
-    result = await next(params);
-  } catch (e: any) {
-    console.log(e);
-    err = e;
+    // clear events
+    this.events = [];
   }
 
-  const event: LogEvent = {
-    _time: before,
-    level: err ? "error" : "info",
-    prisma: {
-      clientVersion: Prisma.prismaVersion.client,
-      durationMs: Date.now() - before,
-      args: stringify(params.args),
-      model: params.model,
-      action: params.action,
-      dataPath: params.dataPath,
-      runInTransaction: params.runInTransaction,
-      error: err ? err.toString() : null,
-    },
+  middleware = async (
+    params: Prisma.MiddlewareParams,
+    next: (params: Prisma.MiddlewareParams) => Promise<any>
+  ) => {
+    // if axiomDataset is not set don't bother sending to axiom
+    if (!process.env.AXIOM_DATASET) {
+      return await next(params);
+    }
+
+    const before = Date.now();
+    var result = [];
+    var err = undefined;
+
+    // if we error, we want to log the error and send to axiom
+    try {
+      result = await next(params);
+    } catch (e: any) {
+      console.log(e);
+      err = e;
+    }
+
+    const event: LogEvent = {
+      _time: before,
+      level: err ? "error" : "info",
+      prisma: {
+        clientVersion: Prisma.prismaVersion.client,
+        durationMs: Date.now() - before,
+        args: stringify(params.args),
+        model: params.model,
+        action: params.action,
+        dataPath: params.dataPath,
+        runInTransaction: params.runInTransaction,
+        error: err ? err.toString() : null,
+      },
+    };
+
+    this.events.push(event);
+    this.throttledIngest();
+
+    return result;
   };
-
-  events.push(event);
-  throttledIngest();
-
-  return result;
 }
 
 interface LogEvent {
@@ -76,4 +85,4 @@ interface LogEvent {
   };
 }
 
-export default logWithAxiom;
+export default Axiom;
