@@ -7,27 +7,26 @@ const stringify = require("json-stable-stringify");
 const axiomToken = process.env.AXIOM_TOKEN;
 const axiomDataset = process.env.AXIOM_DATASET || "";
 
-class Axiom {
-  client: AxiomClient;
-  throttledIngest = throttle(this._ingest, 1000);
-  events: LogEvent[] = [];
-
-  constructor(client?: AxiomClient) {
-    if (client) {
-      this.client = client;
-    } else {
-      this.client = new AxiomClient(undefined, axiomToken);
-    }
+function logWithAxiom(client?: AxiomClient): Prisma.Middleware<any> {
+  let axiom: AxiomClient;
+  if (client) {
+    axiom = client;
+  } else {
+    axiom = new AxiomClient(undefined, axiomToken);
   }
 
-  _ingest() {
-    this.client.datasets.ingestEvents(axiomDataset, this.events);
+  function _ingest() {
+    axiom.datasets.ingestEvents(axiomDataset, events);
 
     // clear events
-    this.events = [];
+    events = [];
   }
 
-  middleware = async (
+  let events: LogEvent[] = [];
+  const throttledIngest = throttle(_ingest, 1000);
+
+  // middleware
+  return async (
     params: Prisma.MiddlewareParams,
     next: (params: Prisma.MiddlewareParams) => Promise<any>
   ) => {
@@ -63,8 +62,8 @@ class Axiom {
       },
     };
 
-    this.events.push(event);
-    this.throttledIngest();
+    events.push(event);
+    throttledIngest();
 
     return result;
   };
@@ -85,4 +84,4 @@ interface LogEvent {
   };
 }
 
-export default Axiom;
+export default logWithAxiom;

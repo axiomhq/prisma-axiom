@@ -9,9 +9,8 @@ Axiom observability middleware for Prisma
 * Set env variables `AXIOM_DATASET` and `AXIOM_TOKEN`
 * Insert the following in your code:
 ```js
-import Axiom from './axiom';
+import logWithAxiom from './axiom';
 const prisma = new PrismaClient({ log: [{ emit: 'event', level: 'query', }] });
 
-const axiom = new Axiom();
-prisma.$use(axiom.middleware);
+prisma.$use(logWithAxiom);
 ```

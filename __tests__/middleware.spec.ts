@@ -6,7 +6,7 @@ process.env.DATABASE_URL = "file:./test.db";
 import { PrismaClient } from "@prisma/client";
 import AxiomClient from "@axiomhq/axiom-node";
 
-import Axiom from "../src/axiom";
+import logWithAxiom from "../src/axiom";
 
 describe("Axiom middleware", () => {
   jest.useFakeTimers();
@@ -14,9 +14,7 @@ describe("Axiom middleware", () => {
   const prisma = new PrismaClient();
 
   const client = new AxiomClient();
-
-  const axiom = new Axiom(client);
-  prisma.$use(axiom.middleware);
+  prisma.$use(logWithAxiom(client));
 
   beforeAll(async () => {});
 
