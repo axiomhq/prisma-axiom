@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 
 async function main() {
     // user axiom middleware
-    prisma.$use(logWithAxiom);
+    prisma.$use(logWithAxiom());
 
     const user = await prisma.user.create({
         data: {
