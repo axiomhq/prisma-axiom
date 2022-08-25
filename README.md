@@ -9,8 +9,23 @@ Axiom observability middleware for Prisma
 * Set env variables `AXIOM_DATASET` and `AXIOM_TOKEN`
 * Insert the following in your code:
 ```js
-import logWithAxiom from 'prisma-axiom';
-const prisma = new PrismaClient({ log: [{ emit: 'event', level: 'query', }] });
+import { withAxiom } from 'prisma-axiom';
+const prisma = withAxiom(new PrismaClient({ log: [{ emit: 'event', level: 'query', }] }));
+```
 
-prisma.$use(logWithAxiom());
+
+
+## Tracing
+
+Using prisma-axiom empowers your application with automated configuration for tracing.
+More configuration could be passed to the tracing functionality as part of `withAxiom` configuration:
+
+```typescript
+const client = withAxiom(new PrismaClient(), { additionalInstrumentations: [ new HttpInstrumentation() ] });
+```
+
+If you want to disable the tracing completely, this could be done by changing the value of `noInstrumentation`:
+
+```js
+const client = withAxiom(new PrismaClient(), { noInstrumentation: true });
 ```

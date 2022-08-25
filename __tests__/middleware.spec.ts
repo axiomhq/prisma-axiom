@@ -14,7 +14,7 @@ describe("Axiom middleware", () => {
   const prisma = new PrismaClient();
 
   const client = new AxiomClient();
-  prisma.$use(logWithAxiom(client));
+  prisma.$use(logWithAxiom(client).middleware);
 
   beforeAll(async () => {});
 

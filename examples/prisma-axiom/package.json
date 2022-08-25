@@ -1,5 +1,5 @@
 {
-  "name": "example",
+  "name": "prisma-axiom-example",
   "version": "1.0.0",
   "description": "example on using prisma-axiom",
   "main": "index.js",
@@ -7,7 +7,7 @@
     "start": "tsc index.ts",
     "test": "jest"
   },
-  "author": "",
+  "author": "axiom.co",
   "license": "ISC",
   "dependencies": {
     "@prisma/client": "^4.2.1",

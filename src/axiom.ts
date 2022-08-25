@@ -1,13 +1,41 @@
-import { Prisma } from "@prisma/client";
+import { Prisma, PrismaClient } from "@prisma/client";
+import { InstrumentationOption } from "@opentelemetry/instrumentation";
 import AxiomClient from "@axiomhq/axiom-node";
 import { throttle } from "./throttle";
+import { setupOtel } from "./instrumentation";
+
 const stringify = require("json-stable-stringify");
 
 // get env var AXIOM_TOKEN and AXIOM_DATASET
 const axiomToken = process.env.AXIOM_TOKEN;
 const axiomDataset = process.env.AXIOM_DATASET || "";
 
-function logWithAxiom(client?: AxiomClient): Prisma.Middleware<any> {
+interface AxiomConfig {
+  additionalInstrumentations?: InstrumentationOption[];
+  noInstrumentation?: boolean;
+}
+
+const defaultConfig: AxiomConfig = {
+  additionalInstrumentations: [],
+  noInstrumentation: false,
+};
+
+export function withAxiom(
+  prisma: PrismaClient,
+  config: AxiomConfig = defaultConfig
+) {
+  const { middleware, flush } = logWithAxiom();
+  prisma.$use(middleware);
+  prisma.$on("beforeExit", flush);
+
+  if (config.noInstrumentation === false) {
+    setupOtel(config.additionalInstrumentations || []);
+  }
+
+  return prisma;
+}
+
+function logWithAxiom(client?: AxiomClient) {
   let axiom: AxiomClient;
   if (client) {
     axiom = client;
@@ -15,8 +43,8 @@ function logWithAxiom(client?: AxiomClient): Prisma.Middleware<any> {
     axiom = new AxiomClient(undefined, axiomToken);
   }
 
-  function _ingest() {
-    axiom.datasets.ingestEvents(axiomDataset, events);
+  async function _ingest() {
+    await axiom.datasets.ingestEvents(axiomDataset, events);
 
     // clear events
     events = [];
@@ -26,7 +54,7 @@ function logWithAxiom(client?: AxiomClient): Prisma.Middleware<any> {
   const throttledIngest = throttle(_ingest, 1000);
 
   // middleware
-  return async (
+  const middleware = async (
     params: Prisma.MiddlewareParams,
     next: (params: Prisma.MiddlewareParams) => Promise<any>
   ) => {
@@ -67,6 +95,12 @@ function logWithAxiom(client?: AxiomClient): Prisma.Middleware<any> {
 
     return result;
   };
+
+  const flush = async () => {
+    await _ingest();
+  };
+
+  return { middleware, flush };
 }
 
 interface LogEvent {
