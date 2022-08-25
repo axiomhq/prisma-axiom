@@ -1,5 +1,5 @@
 {
-  "name": "axiom-prisma",
+  "name": "prisma-axiom",
   "description": "Axiom observability middleware for Prisma",
   "license": "MIT",
   "dependencies": {
