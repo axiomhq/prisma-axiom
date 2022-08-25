@@ -12,5 +12,5 @@ Axiom observability middleware for Prisma
 import logWithAxiom from './axiom';
 const prisma = new PrismaClient({ log: [{ emit: 'event', level: 'query', }] });
 
-prisma.$use(logWithAxiom);
+prisma.$use(logWithAxiom());
 ```
