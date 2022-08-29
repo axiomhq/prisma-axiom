@@ -1,5 +1,5 @@
 import { withAxiom } from '../../src/axiom';
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient } from '@prisma/client';
 
 async function main() {
   const prisma = withAxiom(new PrismaClient());
@@ -11,10 +11,10 @@ async function main() {
     },
   });
 
-  const user = await prisma.user.findFirst()
+  const user = await prisma.user.findFirst();
   console.log('new user created', user);
 
-  await prisma.user.deleteMany()
+  await prisma.user.deleteMany();
 }
 
-main()
+main();

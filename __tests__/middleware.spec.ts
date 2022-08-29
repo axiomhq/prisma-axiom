@@ -1,14 +1,14 @@
 // set env vars before importing logger
-process.env.AXIOM_URL = "https://test.co";
-process.env.AXIOM_DATASET = "test";
-process.env.DATABASE_URL = "file:./test.db";
+process.env.AXIOM_URL = 'https://test.co';
+process.env.AXIOM_DATASET = 'test';
+process.env.DATABASE_URL = 'file:./test.db';
 
-import { PrismaClient } from "@prisma/client";
-import AxiomClient from "@axiomhq/axiom-node";
+import { PrismaClient } from '@prisma/client';
+import AxiomClient from '@axiomhq/axiom-node';
 
-import logWithAxiom from "../src/axiom";
+import logWithAxiom from '../src/axiom';
 
-describe("Axiom middleware", () => {
+describe('Axiom middleware', () => {
   jest.useFakeTimers();
 
   const prisma = new PrismaClient();
@@ -18,11 +18,11 @@ describe("Axiom middleware", () => {
 
   beforeAll(async () => {});
 
-  it("Throttles requests to Axiom", async () => {
+  it('Throttles requests to Axiom', async () => {
     await prisma.user.create({
       data: {
-        name: "Alice",
-        email: "alice@prisma.io",
+        name: 'Alice',
+        email: 'alice@prisma.io',
       },
     });
     await prisma.user.findFirst();
@@ -34,6 +34,6 @@ describe("Axiom middleware", () => {
   });
 
   afterAll(async () => {
-    await prisma.user.delete({ where: { email: "alice@prisma.io" } });
+    await prisma.user.delete({ where: { email: 'alice@prisma.io' } });
   });
 });

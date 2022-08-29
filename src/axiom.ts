@@ -1,15 +1,15 @@
-import { Prisma, PrismaClient } from "@prisma/client";
-import { InstrumentationOption } from "@opentelemetry/instrumentation";
-import AxiomClient from "@axiomhq/axiom-node";
-import { throttle } from "./throttle";
-import { setupOtel } from "./instrumentation";
+import { Prisma, PrismaClient } from '@prisma/client';
+import { InstrumentationOption } from '@opentelemetry/instrumentation';
+import AxiomClient from '@axiomhq/axiom-node';
+import { throttle } from './throttle';
+import { setupOtel } from './instrumentation';
 
-const CloudUrl = "https://cloud.axiom.co";
+const CloudUrl = 'https://cloud.axiom.co';
 
 interface AxiomConfig {
   axiomToken?: string;
   axiomDataset?: string;
-  axiomUrl?: string,
+  axiomUrl?: string;
   disableTracing?: boolean;
   additionalInstrumentations?: InstrumentationOption[];
 }
@@ -22,10 +22,7 @@ const defaultConfig: AxiomConfig = {
   additionalInstrumentations: [],
 };
 
-export function withAxiom(
-  prisma: PrismaClient,
-  config: AxiomConfig = defaultConfig
-) {
+export function withAxiom(prisma: PrismaClient, config: AxiomConfig = defaultConfig) {
   // Merge provided config with default config to fall back to environment
   // variables if not provided.
   config = { ...defaultConfig, ...config };
@@ -33,16 +30,18 @@ export function withAxiom(
   config.axiomUrl = config.axiomUrl || CloudUrl;
 
   if (!config.axiomToken) {
-    console.error("axiom: Failed to initialize prisma-axiom, you need to set an Axiom API token with ingest permission");
+    console.error(
+      'axiom: Failed to initialize prisma-axiom, you need to set an Axiom API token with ingest permission'
+    );
     return prisma;
   } else if (!config.axiomDataset) {
-    console.error("axiom: No dataset provided, logs will not be sent to axiom");
+    console.error('axiom: No dataset provided, logs will not be sent to axiom');
   }
 
   if (config.axiomDataset) {
     const { middleware, flush } = logWithAxiom(config.axiomToken, config.axiomDataset);
     prisma.$use(middleware);
-    prisma.$on("beforeExit", flush);
+    prisma.$on('beforeExit', flush);
   }
 
   if (!config.disableTracing) {
@@ -89,7 +88,7 @@ function logWithAxiom(token: string, dataset: string, client?: AxiomClient) {
 
     const event: LogEvent = {
       _time: before,
-      level: err ? "error" : "info",
+      level: err ? 'error' : 'info',
       prisma: {
         clientVersion: Prisma.prismaVersion.client,
         durationMs: Date.now() - before,
