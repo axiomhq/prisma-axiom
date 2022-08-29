@@ -102,7 +102,7 @@ export function logWithAxiom(client: AxiomClient, dataset: string) {
   };
 
   const flush = async () => {
-    console.log('axiom: flushing logs')
+    console.log('axiom: flushing logs');
     await _ingest();
   };
 
