@@ -1,12 +1,10 @@
-// set env vars before importing logger
-process.env.AXIOM_URL = 'https://test.co';
-process.env.AXIOM_DATASET = 'test';
+process.env.AXIOM_URL = 'https://example.org';
 process.env.DATABASE_URL = 'file:./test.db';
 
 import { PrismaClient } from '@prisma/client';
 import AxiomClient from '@axiomhq/axiom-node';
 
-import logWithAxiom from '../src/axiom';
+import { logWithAxiom } from '../src/axiom';
 
 describe('Axiom middleware', () => {
   jest.useFakeTimers();
@@ -14,7 +12,7 @@ describe('Axiom middleware', () => {
   const prisma = new PrismaClient();
 
   const client = new AxiomClient();
-  prisma.$use(logWithAxiom(client).middleware);
+  prisma.$use(logWithAxiom(client, 'test').middleware);
 
   beforeAll(async () => {});
 

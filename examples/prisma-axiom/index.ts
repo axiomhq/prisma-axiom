@@ -1,4 +1,4 @@
-import { withAxiom } from '../../src/axiom';
+import withAxiom from '../../src/axiom';
 import { PrismaClient } from '@prisma/client';
 
 async function main() {

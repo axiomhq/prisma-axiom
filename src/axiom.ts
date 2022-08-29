@@ -2,7 +2,7 @@ import { Prisma, PrismaClient } from '@prisma/client';
 import { InstrumentationOption } from '@opentelemetry/instrumentation';
 import AxiomClient from '@axiomhq/axiom-node';
 import { throttle } from './throttle';
-import { setupOtel } from './instrumentation';
+import { setupOtel } from './otel';
 
 const CloudUrl = 'https://cloud.axiom.co';
 
@@ -10,7 +10,7 @@ interface AxiomConfig {
   axiomToken?: string;
   axiomDataset?: string;
   axiomUrl?: string;
-  disableTracing?: boolean;
+  setupTracing?: boolean;
   additionalInstrumentations?: InstrumentationOption[];
 }
 
@@ -18,11 +18,11 @@ const defaultConfig: AxiomConfig = {
   axiomToken: process.env.AXIOM_TOKEN,
   axiomDataset: process.env.AXIOM_DATASET,
   axiomUrl: process.env.AXIOM_URL,
-  disableTracing: false,
+  setupTracing: true,
   additionalInstrumentations: [],
 };
 
-export function withAxiom(prisma: PrismaClient, config: AxiomConfig = defaultConfig) {
+export default function withAxiom(prisma: PrismaClient, config: AxiomConfig = defaultConfig) {
   // Merge provided config with default config to fall back to environment
   // variables if not provided.
   config = { ...defaultConfig, ...config };
@@ -39,28 +39,22 @@ export function withAxiom(prisma: PrismaClient, config: AxiomConfig = defaultCon
   }
 
   if (config.axiomDataset) {
-    const { middleware, flush } = logWithAxiom(config.axiomToken, config.axiomDataset);
+    const axiomClient = new AxiomClient(config.axiomUrl, config.axiomToken);
+    const { middleware, flush } = logWithAxiom(axiomClient, config.axiomDataset);
     prisma.$use(middleware);
     prisma.$on('beforeExit', flush);
   }
 
-  if (!config.disableTracing) {
+  if (config.setupTracing) {
     setupOtel(config.axiomToken, config.axiomUrl, config.additionalInstrumentations || []);
   }
 
   return prisma;
 }
 
-function logWithAxiom(token: string, dataset: string, client?: AxiomClient) {
-  let axiom: AxiomClient;
-  if (client) {
-    axiom = client;
-  } else {
-    axiom = new AxiomClient(undefined, token);
-  }
-
+export function logWithAxiom(client: AxiomClient, dataset: string) {
   async function _ingest() {
-    await axiom.datasets.ingestEvents(dataset, events);
+    await client.datasets.ingestEvents(dataset, events);
 
     // clear events
     events = [];
@@ -128,5 +122,3 @@ interface LogEvent {
     error?: any;
   };
 }
-
-export default logWithAxiom;
