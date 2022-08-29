@@ -10,7 +10,6 @@
   "author": "axiom.co",
   "license": "ISC",
   "dependencies": {
-    "@opentelemetry/instrumentation-http": "^0.32.0",
     "@prisma/client": "^4.2.1",
     "@types/node": "^18.7.6",
     "prettier": "^2.7.1",

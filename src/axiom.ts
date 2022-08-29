@@ -4,47 +4,64 @@ import AxiomClient from "@axiomhq/axiom-node";
 import { throttle } from "./throttle";
 import { setupOtel } from "./instrumentation";
 
-const stringify = require("json-stable-stringify");
-
-// get env var AXIOM_TOKEN and AXIOM_DATASET
-const axiomToken = process.env.AXIOM_TOKEN;
-const axiomDataset = process.env.AXIOM_DATASET || "";
+const CloudUrl = "https://cloud.axiom.co";
 
 interface AxiomConfig {
+  axiomToken?: string;
+  axiomDataset?: string;
+  axiomUrl?: string,
+  disableTracing?: boolean;
   additionalInstrumentations?: InstrumentationOption[];
-  noInstrumentation?: boolean;
 }
 
 const defaultConfig: AxiomConfig = {
+  axiomToken: process.env.AXIOM_TOKEN,
+  axiomDataset: process.env.AXIOM_DATASET,
+  axiomUrl: process.env.AXIOM_URL,
+  disableTracing: false,
   additionalInstrumentations: [],
-  noInstrumentation: false,
 };
 
 export function withAxiom(
   prisma: PrismaClient,
   config: AxiomConfig = defaultConfig
 ) {
-  const { middleware, flush } = logWithAxiom();
-  prisma.$use(middleware);
-  prisma.$on("beforeExit", flush);
+  // Merge provided config with default config to fall back to environment
+  // variables if not provided.
+  config = { ...defaultConfig, ...config };
+  // Use the CloudURL if no URL is provided.
+  config.axiomUrl = config.axiomUrl || CloudUrl;
 
-  if (config.noInstrumentation === false) {
-    setupOtel(config.additionalInstrumentations || []);
+  if (!config.axiomToken) {
+    console.error("axiom: Failed to initialize prisma-axiom, you need to set an Axiom API token with ingest permission");
+    return prisma;
+  } else if (!config.axiomDataset) {
+    console.error("axiom: No dataset provided, logs will not be sent to axiom");
+  }
+
+  if (config.axiomDataset) {
+    const { middleware, flush } = logWithAxiom(config.axiomToken, config.axiomDataset);
+    prisma.$use(middleware);
+    prisma.$on("beforeExit", flush);
+  }
+
+  if (!config.disableTracing) {
+    setupOtel(config.axiomToken, config.axiomUrl, config.additionalInstrumentations || []);
   }
 
   return prisma;
 }
 
-function logWithAxiom(client?: AxiomClient) {
+function logWithAxiom(token: string, dataset: string, client?: AxiomClient) {
   let axiom: AxiomClient;
   if (client) {
     axiom = client;
   } else {
-    axiom = new AxiomClient(undefined, axiomToken);
+    axiom = new AxiomClient(undefined, token);
   }
 
   async function _ingest() {
-    await axiom.datasets.ingestEvents(axiomDataset, events);
+    await axiom.datasets.ingestEvents(dataset, events);
 
     // clear events
     events = [];
@@ -58,11 +75,6 @@ function logWithAxiom(client?: AxiomClient) {
     params: Prisma.MiddlewareParams,
     next: (params: Prisma.MiddlewareParams) => Promise<any>
   ) => {
-    // if axiomDataset is not set don't bother sending to axiom
-    if (!process.env.AXIOM_DATASET) {
-      return await next(params);
-    }
-
     const before = Date.now();
     var result = [];
     var err = undefined;
@@ -81,7 +93,7 @@ function logWithAxiom(client?: AxiomClient) {
       prisma: {
         clientVersion: Prisma.prismaVersion.client,
         durationMs: Date.now() - before,
-        args: stringify(params.args),
+        args: JSON.stringify(params.args),
         model: params.model,
         action: params.action,
         dataPath: params.dataPath,

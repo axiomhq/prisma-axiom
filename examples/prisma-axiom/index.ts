@@ -1,7 +1,5 @@
 import { withAxiom } from '../../src/axiom';
 import { PrismaClient } from '@prisma/client'
-const { HttpInstrumentation } = require('@opentelemetry/instrumentation-http');
-
 
 async function main() {
   const prisma = withAxiom(new PrismaClient());

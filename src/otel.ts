@@ -1,4 +1,3 @@
-// Imports
 import { SemanticResourceAttributes } from "@opentelemetry/semantic-conventions";
 import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-proto";
 import {
@@ -10,35 +9,28 @@ import { NodeTracerProvider } from "@opentelemetry/sdk-trace-node";
 import { PrismaInstrumentation } from "@prisma/instrumentation";
 import { Resource } from "@opentelemetry/resources";
 
-const AXIOM_URL = process.env.AXIOM_URL;
+const Version = require('../package.json').version;
 
-const collectorOptions = {
-  url: AXIOM_URL + "/api/v1/traces", // url is optional and can be omitted - default is http://localhost:4318/v1/traces
-  headers: {
-    Authorization: `Bearer ${process.env.AXIOM_TOKEN}`,
-    // 'Content-Type': 'application/json',
-    Accept: "application/json",
-  }, // an optional object containing custom headers to be sent with each request
-  concurrencyLimit: 10, // an optional limit on pending requests
-};
+export function setupOtel(axiomToken: string, axiomUrl: string, additionalInstrumentations: InstrumentationOption[]) {
+  const exporter = new OTLPTraceExporter({
+    url: axiomUrl + "/api/v1/traces", // url is optional and can be omitted - default is http://localhost:4318/v1/traces
+    headers: {
+      Authorization: `Bearer ${axiomToken}`,
+      Accept: "application/json",
+      'User-Agent': 'prisma-axiom/' + Version,
+    },
+    concurrencyLimit: 10,
+  });
 
-export function setupOtel(additionalInstrumentations: InstrumentationOption[]) {
-  console.log(collectorOptions);
-  const exporter = new OTLPTraceExporter(collectorOptions);
-
-  // Configure the trace provider
   const provider = new NodeTracerProvider({
     resource: new Resource({
       [SemanticResourceAttributes.SERVICE_NAME]: process.env.npm_package_name,
     }),
   });
 
-  // Configure how spans are processed and exported. In this case we're sending spans
-  // as we receive them to an OTLP-compatible collector (e.g. Jaeger).
   // TODO: use BatchSpanProcessor
   provider.addSpanProcessor(new SimpleSpanProcessor(exporter));
 
-  // Register your auto-instrumentors
   registerInstrumentations({
     tracerProvider: provider,
     instrumentations: [
@@ -47,6 +39,5 @@ export function setupOtel(additionalInstrumentations: InstrumentationOption[]) {
     ],
   });
 
-  // Register the provider globally
   provider.register();
 }
