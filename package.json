@@ -3,7 +3,13 @@
   "description": "Axiom observability middleware for Prisma",
   "license": "MIT",
   "dependencies": {
-    "json-stable-stringify": "^1.0.1"
+    "@opentelemetry/exporter-trace-otlp-proto": "^0.32.0",
+    "@opentelemetry/instrumentation": "^0.32.0",
+    "@opentelemetry/resources": "^1.6.0",
+    "@opentelemetry/sdk-trace-base": "^1.6.0",
+    "@opentelemetry/sdk-trace-node": "^1.6.0",
+    "@opentelemetry/semantic-conventions": "^1.6.0",
+    "@prisma/instrumentation": "^4.2.1"
   },
   "devDependencies": {
     "@types/faker": "5.5.9",

@@ -1,22 +1,20 @@
-import logWithAxiom from '../../src/axiom';
-import { PrismaClient } from '@prisma/client'
-
-const prisma = new PrismaClient();
+import withAxiom from '../../src/axiom';
+import { PrismaClient } from '@prisma/client';
 
 async function main() {
-    // user axiom middleware
-    prisma.$use(logWithAxiom());
+  const prisma = withAxiom(new PrismaClient());
 
-    const user = await prisma.user.create({
-        data: {
-          name: 'Alice',
-          email: 'alice@prisma.io',
-        },
-    });
+  await prisma.user.create({
+    data: {
+      name: 'Alice',
+      email: 'alice@prisma.io',
+    },
+  });
 
-    console.log('new user created', user);
-    
-    console.log(await prisma.user.findFirst());
+  const user = await prisma.user.findFirst();
+  console.log('new user created', user);
+
+  await prisma.user.deleteMany();
 }
 
-main()
+main();

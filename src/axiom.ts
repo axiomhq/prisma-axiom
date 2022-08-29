@@ -1,22 +1,60 @@
-import { Prisma } from "@prisma/client";
-import AxiomClient from "@axiomhq/axiom-node";
-import { throttle } from "./throttle";
-const stringify = require("json-stable-stringify");
+import { Prisma, PrismaClient } from '@prisma/client';
+import { InstrumentationOption } from '@opentelemetry/instrumentation';
+import AxiomClient from '@axiomhq/axiom-node';
+import { throttle } from './throttle';
+import { setupOtel } from './otel';
 
-// get env var AXIOM_TOKEN and AXIOM_DATASET
-const axiomToken = process.env.AXIOM_TOKEN;
-const axiomDataset = process.env.AXIOM_DATASET || "";
+const CloudUrl = 'https://cloud.axiom.co';
 
-function logWithAxiom(client?: AxiomClient): Prisma.Middleware<any> {
-  let axiom: AxiomClient;
-  if (client) {
-    axiom = client;
-  } else {
-    axiom = new AxiomClient(undefined, axiomToken);
+interface AxiomConfig {
+  axiomToken?: string;
+  axiomDataset?: string;
+  axiomUrl?: string;
+  setupTracing?: boolean;
+  additionalInstrumentations?: InstrumentationOption[];
+}
+
+const defaultConfig: AxiomConfig = {
+  axiomToken: process.env.AXIOM_TOKEN,
+  axiomDataset: process.env.AXIOM_DATASET,
+  axiomUrl: process.env.AXIOM_URL,
+  setupTracing: true,
+  additionalInstrumentations: [],
+};
+
+export default function withAxiom(prisma: PrismaClient, config: AxiomConfig = defaultConfig) {
+  // Merge provided config with default config to fall back to environment
+  // variables if not provided.
+  config = { ...defaultConfig, ...config };
+  // Use the CloudURL if no URL is provided.
+  config.axiomUrl = config.axiomUrl || CloudUrl;
+
+  if (!config.axiomToken) {
+    console.error(
+      'axiom: Failed to initialize prisma-axiom, you need to set an Axiom API token with ingest permission'
+    );
+    return prisma;
+  } else if (!config.axiomDataset) {
+    console.error('axiom: No dataset provided, logs will not be sent to axiom');
   }
 
-  function _ingest() {
-    axiom.datasets.ingestEvents(axiomDataset, events);
+  if (config.axiomDataset) {
+    const axiomClient = new AxiomClient(config.axiomUrl, config.axiomToken);
+    const { middleware, flush } = logWithAxiom(axiomClient, config.axiomDataset);
+    prisma.$use(middleware);
+    prisma.$on('beforeExit', flush);
+  }
+
+  if (config.setupTracing) {
+    setupOtel(config.axiomToken, config.axiomUrl, config.additionalInstrumentations || []);
+  }
+
+  return prisma;
+}
+
+export function logWithAxiom(client: AxiomClient, dataset: string) {
+  async function _ingest() {
+    await client.datasets.ingestEvents(dataset, events);
 
     // clear events
     events = [];
@@ -26,15 +64,10 @@ function logWithAxiom(client?: AxiomClient): Prisma.Middleware<any> {
   const throttledIngest = throttle(_ingest, 1000);
 
   // middleware
-  return async (
+  const middleware = async (
     params: Prisma.MiddlewareParams,
     next: (params: Prisma.MiddlewareParams) => Promise<any>
   ) => {
-    // if axiomDataset is not set don't bother sending to axiom
-    if (!process.env.AXIOM_DATASET) {
-      return await next(params);
-    }
-
     const before = Date.now();
     var result = [];
     var err = undefined;
@@ -49,11 +82,11 @@ function logWithAxiom(client?: AxiomClient): Prisma.Middleware<any> {
 
     const event: LogEvent = {
       _time: before,
-      level: err ? "error" : "info",
+      level: err ? 'error' : 'info',
       prisma: {
         clientVersion: Prisma.prismaVersion.client,
         durationMs: Date.now() - before,
-        args: stringify(params.args),
+        args: JSON.stringify(params.args),
         model: params.model,
         action: params.action,
         dataPath: params.dataPath,
@@ -67,6 +100,13 @@ function logWithAxiom(client?: AxiomClient): Prisma.Middleware<any> {
 
     return result;
   };
+
+  const flush = async () => {
+    console.log('axiom: flushing logs')
+    await _ingest();
+  };
+
+  return { middleware, flush };
 }
 
 interface LogEvent {
@@ -83,5 +123,3 @@ interface LogEvent {
     error?: any;
   };
 }
-
-export default logWithAxiom;
