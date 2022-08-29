@@ -1,19 +1,20 @@
 import { withAxiom } from '../../src/axiom';
 import { PrismaClient } from '@prisma/client'
+const { HttpInstrumentation } = require('@opentelemetry/instrumentation-http');
+
 
 async function main() {
-  const prisma = withAxiom(new PrismaClient({ log: [{ emit: 'event', level: 'query', }] }));
+  const prisma = withAxiom(new PrismaClient());
 
-  const user = await prisma.user.create({
+  await prisma.user.create({
     data: {
       name: 'Alice',
       email: 'alice@prisma.io',
     },
   });
 
+  const user = await prisma.user.findFirst()
   console.log('new user created', user);
-
-  console.log(await prisma.user.findFirst());
 
   await prisma.user.deleteMany()
 }
