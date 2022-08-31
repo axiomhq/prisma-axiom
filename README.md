@@ -1,29 +1,28 @@
-# Axiom Prisma
+# prisma-axiom [![CI](https://github.com/axiomhq/prisma-axiom/actions/workflows/ci.yml/badge.svg)](https://github.com/axiomhq/prisma-axiom/actions/workflows/ci.yml)
 
-Axiom observability middleware for Prisma
+Axiom observability middleware for Prisma.
 
-## How to use
-
-- Create an account at Axiom Cloud
-- Create a dataset and an API token with ingest permission for that dataset
-- Set env variables `AXIOM_DATASET` and `AXIOM_TOKEN`
+## Quickstart
 
 1. Install prisma-axiom
 
-```
+```shell
 npm install --save prisma-axiom
 ```
 
-- Insert the following in your code:
+2. Add the following where you initialize your Prisma client:
 
-```js
+```ts
 import withAxiom from 'prisma-axiom';
 const prisma = withAxiom(new PrismaClient());
 ```
 
-2. Enable prisma tracing flag
+> **Note**: This will configure Axiom from the `AXIOM_TOKEN` and `AXIOM_DATASET`
+> environment variables. Check out the 
+> [Kitchen Sink Full Configuration](#kitchen-sink-full-configuration) for more
+> advanced configuration.
 
-In the generator block of your schema.prisma file, enable the tracing feature flag:
+3. Enable the prisma tracing preview feature in `schema.prisma` like this:
 
 ```js
 generator client {
@@ -32,17 +31,26 @@ generator client {
 }
 ```
 
-## Tracing
+## Kitchen Sink Full Configuration
 
-Using prisma-axiom empowers your application with automated configuration for tracing.
-More configuration could be passed to the tracing functionality as part of `withAxiom` configuration:
+You can configure `prisma-axiom` by passing an options object as the second
+parameter.
+This snippet shows all available options:
 
 ```ts
-const client = withAxiom(new PrismaClient(), { additionalInstrumentations: [new HttpInstrumentation()] });
+const prisma = withAxiom(new PrismaClient(), {
+  axiomToken:                 "xaat-xxxxx",
+  axiomDataset:               "prisma-logs",
+  axiomUrl:                   "https://my-axiom.example.org",
+  setupTracing:               true, // set to false to disable tracing
+  additionalInstrumentations: [new HttpInstrumentation()] // add more instrumentations to the tracing setup
+});
 ```
 
-If you want to disable the tracing completely, this could be done by setting `setupTracing` to `false`:
+## License
 
-```js
-const client = withAxiom(new PrismaClient(), { setupTracing: false });
-```
+&copy; Axiom, Inc., 2022
+
+Distributed under MIT License (`The MIT License`).
+
+See [LICENSE](LICENSE) for more information.
