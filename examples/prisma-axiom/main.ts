@@ -4,7 +4,7 @@ import { PrismaClient } from '@prisma/client';
 const client = new PrismaClient();
 const prisma = withAxiom(client);
 
-async function main () {
+async function main() {
   await prisma.user.create({
     data: {
       name: 'Alice',
@@ -18,14 +18,6 @@ async function main () {
   await prisma.user.deleteMany();
 
 }
-
-process.on('SIGINT', () => {
-  console.log('SIGINT signal received: closing HTTP server')
-  // call prisma disconnect t ensure logs and traces are flushed
-  prisma.$disconnect().finally(() => {
-    process.exit(0)
-  });
-})
 
 main().finally(async () => {
   console.log('disconnct prisma')

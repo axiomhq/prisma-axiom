@@ -9,7 +9,7 @@ import { Resource } from '@opentelemetry/resources';
 
 const Version = require('../package.json').version;
 
-export function setupOtel(axiomToken: string, axiomUrl: string, additionalInstrumentations: InstrumentationOption[]) {
+export function setupOtel(axiomToken: string, axiomUrl: string, additionalInstrumentations: InstrumentationOption[]): NodeTracerProvider {
   const exporter = axiomExporter(axiomUrl, axiomToken);
 
   const provider = new NodeTracerProvider({

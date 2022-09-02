@@ -48,10 +48,10 @@ export default function withAxiom(prisma: PrismaClient, config: AxiomConfig = de
   }
 
   if (config.setupTracing) {
-    // const provider = setupOtel(config.axiomToken, config.axiomUrl, config.additionalInstrumentations || []);
-    setupOtel(config.axiomToken, config.axiomUrl, config.additionalInstrumentations || []);
-    // TODO: fix provider shutdown
-    // flushHandlers.push(provider.shutdown);
+    const provider = setupOtel(config.axiomToken, config.axiomUrl, config.additionalInstrumentations || []);
+    flushHandlers.push(async () => {
+      await provider.shutdown();
+    });
   }
 
   prisma.$on('beforeExit', async () => {
