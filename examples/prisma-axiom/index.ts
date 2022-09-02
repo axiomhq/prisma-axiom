@@ -28,7 +28,6 @@ process.on('SIGINT', () => {
   console.log('SIGINT signal received: closing HTTP server')
   // call prisma disconnect t ensure logs and traces are flushed
   prisma.$disconnect().finally(() => {
-    console.log('disconnect');
     server.close();
     process.exit(0)
   });
