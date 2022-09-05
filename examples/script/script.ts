@@ -1,9 +1,10 @@
-import withAxiom from '../../src/axiom';
+import withAxiom from 'prisma-axiom';
 import { PrismaClient } from '@prisma/client';
 
-async function main() {
-  const prisma = withAxiom(new PrismaClient());
+const client = new PrismaClient();
+const prisma = withAxiom(client);
 
+async function main() {
   await prisma.user.create({
     data: {
       name: 'Alice',
@@ -15,6 +16,10 @@ async function main() {
   console.log('new user created', user);
 
   await prisma.user.deleteMany();
+
 }
 
-main();
+main().finally(async () => {
+  console.log('disconnect prisma')
+  await prisma.$disconnect()
+})

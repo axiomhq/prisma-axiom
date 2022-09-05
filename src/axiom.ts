@@ -38,16 +38,28 @@ export default function withAxiom(prisma: PrismaClient, config: AxiomConfig = de
     console.error('axiom: No dataset provided, logs will not be sent to axiom');
   }
 
+  const flushHandlers: (() => Promise<any>)[] = [];
+
   if (config.axiomDataset) {
     const axiomClient = new AxiomClient(config.axiomUrl, config.axiomToken);
     const { middleware, flush } = logWithAxiom(axiomClient, config.axiomDataset);
     prisma.$use(middleware);
-    prisma.$on('beforeExit', flush);
+    flushHandlers.push(flush);
   }
 
   if (config.setupTracing) {
-    setupOtel(config.axiomToken, config.axiomUrl, config.additionalInstrumentations || []);
+    const provider = setupOtel(config.axiomToken, config.axiomUrl, config.additionalInstrumentations || []);
+    flushHandlers.push(async () => {
+      await provider.shutdown();
+    });
   }
+
+  prisma.$on('beforeExit', async () => {
+    // call all the flush methods for logs or traces to ensure deliveribility
+    await flushHandlers.forEach(async (cb) => {
+      await cb();
+    });
+  });
 
   return prisma;
 }
