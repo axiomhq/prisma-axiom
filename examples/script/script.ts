@@ -1,4 +1,4 @@
-import withAxiom from '../../src/axiom';
+import withAxiom from 'prisma-axiom';
 import { PrismaClient } from '@prisma/client';
 
 const client = new PrismaClient();
@@ -20,6 +20,6 @@ async function main() {
 }
 
 main().finally(async () => {
-  console.log('disconnct prisma')
+  console.log('disconnect prisma')
   await prisma.$disconnect()
 })
