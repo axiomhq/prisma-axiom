@@ -18,8 +18,6 @@ export function otelTracerProvider(
   const provider = new NodeTracerProvider({
     resource: new Resource({
       [SemanticResourceAttributes.SERVICE_NAME]: process.env.npm_package_name,
-      [SemanticResourceAttributes.TELEMETRY_SDK_NAME]: 'prisma-axiom',
-      [SemanticResourceAttributes.TELEMETRY_SDK_VERSION]: Version,
     }),
   });
 
