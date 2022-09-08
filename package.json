@@ -41,7 +41,7 @@
     "url": "https://github.com/axiomhq/prisma-axiom/issues"
   },
   "homepage": "https://github.com/axiomhq/prisma-axiom#readme",
-  "main": "axiom.ts",
+  "main": "index.ts",
   "scripts": {
     "build": "tsc",
     "prepare": "npm run build",

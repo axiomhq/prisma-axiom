@@ -1,4 +1,3 @@
-const { trace } = require('@opentelemetry/api');
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto';
 import { InstrumentationOption, registerInstrumentations } from '@opentelemetry/instrumentation';
@@ -9,12 +8,12 @@ import { Resource } from '@opentelemetry/resources';
 
 const Version = require('../package.json').version;
 
-export function setupOtel(
+export function otelTracerProvider(
   axiomToken: string,
   axiomUrl: string,
   additionalInstrumentations: InstrumentationOption[]
 ): NodeTracerProvider {
-  const exporter = axiomExporter(axiomUrl, axiomToken);
+  const exporter = otelTraceExporter(axiomUrl, axiomToken);
 
   const provider = new NodeTracerProvider({
     resource: new Resource({
@@ -31,12 +30,10 @@ export function setupOtel(
     instrumentations: [new PrismaInstrumentation(), ...additionalInstrumentations],
   });
 
-  trace.setGlobalTracerProvider(provider);
-  provider.register();
   return provider;
 }
 
-export function axiomExporter(axiomUrl: string, axiomToken: string) {
+export function otelTraceExporter(axiomUrl: string, axiomToken: string) {
   return new OTLPTraceExporter({
     url: axiomUrl + '/api/v1/traces',
     headers: {

@@ -1,8 +1,12 @@
+import { trace } from '@opentelemetry/api';
 import { PrismaClient } from '@prisma/client';
 import { InstrumentationOption } from '@opentelemetry/instrumentation';
-import { setupOtel } from './otel';
+import { otelTracerProvider } from './otel';
 
-const CloudUrl = 'https://cloud.axiom.co';
+// Re-export for advanced configuration
+export { otelTracerProvider, otelTraceExporter } from './otel';
+
+const AxiomCloudUrl = 'https://cloud.axiom.co';
 
 interface AxiomConfig {
   axiomToken?: string;
@@ -20,8 +24,7 @@ export default function withAxiom(prisma: PrismaClient, config: AxiomConfig = de
   // Merge provided config with default config to fall back to environment
   // variables if not provided.
   config = { ...defaultConfig, ...config };
-  // Use the CloudURL if no URL is provided.
-  config.axiomUrl = config.axiomUrl || CloudUrl;
+  config.axiomUrl = config.axiomUrl || AxiomCloudUrl;
 
   if (!config.axiomToken) {
     console.error(
@@ -30,7 +33,12 @@ export default function withAxiom(prisma: PrismaClient, config: AxiomConfig = de
     return prisma;
   }
 
-  const provider = setupOtel(config.axiomToken, config.axiomUrl, config.additionalInstrumentations || []);
+  const provider = otelTracerProvider(config.axiomToken, config.axiomUrl, config.additionalInstrumentations || []);
+
+  // Register provider
+  trace.setGlobalTracerProvider(provider);
+  provider.register();
+
   prisma.$on('beforeExit', async () => {
     await provider.shutdown();
   });
