@@ -1,7 +1,7 @@
 import { trace } from '@opentelemetry/api';
-import { PrismaClient } from '@prisma/client';
 import { InstrumentationOption } from '@opentelemetry/instrumentation';
 import { otelTracerProvider } from './otel';
+import { PrismaClient } from '@prisma/client';
 
 // Re-export for advanced configuration
 export { otelTracerProvider, otelTraceExporter } from './otel';
@@ -20,7 +20,7 @@ const defaultConfig: AxiomConfig = {
   additionalInstrumentations: [],
 };
 
-export default function withAxiom(prisma: PrismaClient, config: AxiomConfig = defaultConfig) {
+export default function withAxiom(prisma: PrismaClient, config: AxiomConfig = defaultConfig): PrismaClient {
   // Merge provided config with default config to fall back to environment
   // variables if not provided.
   config = { ...defaultConfig, ...config };

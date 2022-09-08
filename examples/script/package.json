@@ -1,0 +1,18 @@
+{
+  "name": "prisma-axiom-script-example",
+  "version": "1.0.0",
+  "description": "example on using prisma-axiom",
+  "main": "index.ts",
+  "scripts": {
+    "start": "ts-node index.ts"
+  },
+  "dependencies": {
+    "prisma-axiom": "../../dist",
+    "@prisma/client": "4.2.1",
+    "@types/node": "^18.7.6",
+    "express": "^4.18.1",
+    "prisma": "^4.2.1",
+    "ts-node": "^10.9.1",
+    "typescript": "^4.7.4"
+  }
+}
