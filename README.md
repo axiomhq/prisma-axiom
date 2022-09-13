@@ -7,7 +7,7 @@ Axiom observability middleware for Prisma.
 1. Install prisma-axiom
 
 ```shell
-npm install --save prisma-axiom
+npm install --save @axiomhq/axiom-prisma
 ```
 
 2. Add the following where you initialize your Prisma client:
