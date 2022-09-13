@@ -1,7 +1,7 @@
 {
-  "name": "prisma-axiom-example-express",
+  "name": "prisma-axiom-example-script",
   "version": "1.0.0",
-  "description": "example on using prisma-axiom",
+  "description": "example on using prisma-axiom in a script",
   "main": "index.ts",
   "scripts": {
     "start": "ts-node index.ts"

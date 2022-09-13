@@ -17,8 +17,8 @@ import withAxiom from 'prisma-axiom';
 const prisma = withAxiom(new PrismaClient());
 ```
 
-> **Note**: This will configure Axiom from the `AXIOM_TOKEN` and `AXIOM_DATASET`
-> environment variables. Check out the 
+> **Note**: This will configure Axiom from the `AXIOM_TOKEN` and other 
+> environment variables. Check out the
 > [Kitchen Sink Full Configuration](#kitchen-sink-full-configuration) for more
 > advanced configuration.
 
@@ -40,9 +40,7 @@ This snippet shows all available options:
 ```ts
 const prisma = withAxiom(new PrismaClient(), {
   axiomToken:                 "xaat-xxxxx",
-  axiomDataset:               "prisma-logs",
   axiomUrl:                   "https://my-axiom.example.org",
-  setupTracing:               true, // set to false to disable tracing
   additionalInstrumentations: [new HttpInstrumentation()] // add more instrumentations to the tracing setup
 });
 ```
