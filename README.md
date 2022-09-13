@@ -13,7 +13,7 @@ npm install --save @axiomhq/axiom-prisma
 2. Add the following where you initialize your Prisma client:
 
 ```ts
-import withAxiom from 'prisma-axiom';
+import withAxiom from '@axiomhq/axiom-prisma';
 const prisma = withAxiom(new PrismaClient());
 ```
 
