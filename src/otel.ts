@@ -20,6 +20,7 @@ export function otelTracerProvider(
   const provider = new NodeTracerProvider({
     resource: new Resource({
       [SemanticResourceAttributes.SERVICE_NAME]: process.env.npm_package_name,
+      [SemanticResourceAttributes.SERVICE_VERSION]: process.env.npm_package_version,
     }),
   });
 
