@@ -33,8 +33,12 @@ generator client {
 
 ## Kitchen Sink Full Configuration
 
+Import and use `withAxiom` function to automatically setup & configure opentelemtry
+with `PrismaInstrumentation` to your axiom dashboard.
+
 You can configure `prisma-axiom` by passing an options object as the second
-parameter.
+parameter to `withAxiom`.
+
 This snippet shows all available options:
 
 ```ts
@@ -43,6 +47,41 @@ const prisma = withAxiom(new PrismaClient(), {
   axiomUrl:                   "https://my-axiom.example.org",
   additionalInstrumentations: [new HttpInstrumentation()] // add more instrumentations to the tracing setup
 });
+```
+
+#### Custom Configuration
+
+When you need setup your opentelemetry setup you can use axiom's exporter,
+define axiom's exporter and attach it to the provider. You can checkout the example
+
+
+```ts
+import { otelTraceExporter } from 'prisma-axiom';
+
+const provider = new NodeTracerProvider({
+  resource: new Resource({
+    [SemanticResourceAttributes.SERVICE_NAME]: process.env.npm_package_name,
+    [SemanticResourceAttributes.SERVICE_VERSION]: process.env.npm_package_version,
+  }),
+})
+
+// create axiom's exporter object and add a new span processor:
+const exporter = otelTraceExporter(process.env.AXIOM_URL, process.env.AXIOM_TOKEN);
+provider.addSpanProcessor(new BatchSpanProcessor(exporter));
+provider.register()
+
+registerInstrumentations({
+  instrumentations: [new PrismaInstrumentation(), new HttpInstrumentation()],
+});
+
+function main () {
+  // ...
+}
+
+// shutdown the provider to ensure delivery
+main().finally(async () => {
+  await provider.shutdown()
+})
 ```
 
 ## License
