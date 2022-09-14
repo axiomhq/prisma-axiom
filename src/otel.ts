@@ -5,7 +5,7 @@ import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-base';
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node';
 import { PrismaInstrumentation } from '@prisma/instrumentation';
 import { Resource } from '@opentelemetry/resources';
-import { trace } from '@opentelemetry/api'
+import { trace } from '@opentelemetry/api';
 
 const Version = require('../package.json').version;
 
@@ -16,7 +16,6 @@ export function otelTracerProvider(
 ): NodeTracerProvider {
   const exporter = otelTraceExporter(axiomUrl, axiomToken);
 
-
   const provider = new NodeTracerProvider({
     resource: new Resource({
       [SemanticResourceAttributes.SERVICE_NAME]: process.env.npm_package_name,
@@ -26,7 +25,7 @@ export function otelTracerProvider(
   provider.addSpanProcessor(new BatchSpanProcessor(exporter));
 
   if (trace.setGlobalTracerProvider(provider) == false) {
-    provider.register()
+    provider.register();
   }
 
   registerInstrumentations({
