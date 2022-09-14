@@ -52,7 +52,8 @@ const prisma = withAxiom(new PrismaClient(), {
 #### Custom Configuration
 
 When you need setup your opentelemetry setup you can use axiom's exporter,
-define axiom's exporter and attach it to the provider. You can checkout the example
+define axiom's exporter and attach it to the provider. You can checkout the [extends-otel example](./examples/extend-otel/index.ts)
+for more details.
 
 
 ```ts
