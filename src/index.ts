@@ -2,11 +2,10 @@ import { trace } from '@opentelemetry/api';
 import { InstrumentationOption } from '@opentelemetry/instrumentation';
 import { otelTracerProvider } from './otel';
 import { PrismaClient } from '@prisma/client';
+import { AxiomCloudUrl, printInitializationError } from './shared';
 
 // Re-export for advanced configuration
 export { otelTracerProvider, otelTraceExporter } from './otel';
-
-const AxiomCloudUrl = 'https://cloud.axiom.co';
 
 interface AxiomConfig {
   axiomToken?: string;
@@ -27,9 +26,7 @@ export default function withAxiom(prisma: PrismaClient, config: AxiomConfig = de
   config.axiomUrl = config.axiomUrl || AxiomCloudUrl;
 
   if (!config.axiomToken) {
-    console.error(
-      'axiom: Failed to initialize prisma-axiom, you need to set an Axiom API token with ingest permission'
-    );
+    printInitializationError();
     return prisma;
   }
 

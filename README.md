@@ -55,6 +55,8 @@ When you need setup your opentelemetry setup you can use axiom's exporter,
 define axiom's exporter and attach it to the provider. You can checkout the [extends-otel example](./examples/extend-otel/index.ts)
 for more details.
 
+The exporter can automatically retreive axiom url and token for environment variables `AXIOM_URL` and `AXIOM_TOKEN` respectively,
+or values could be passed as parameters.
 
 ```ts
 import { otelTraceExporter } from 'prisma-axiom';
@@ -67,7 +69,7 @@ const provider = new NodeTracerProvider({
 })
 
 // create axiom's exporter object and add a new span processor:
-const exporter = otelTraceExporter(process.env.AXIOM_URL, process.env.AXIOM_TOKEN);
+const exporter = otelTraceExporter();
 provider.addSpanProcessor(new BatchSpanProcessor(exporter));
 provider.register()
 

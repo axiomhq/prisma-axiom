@@ -6,6 +6,7 @@ import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node';
 import { PrismaInstrumentation } from '@prisma/instrumentation';
 import { Resource } from '@opentelemetry/resources';
 import { trace } from '@opentelemetry/api';
+import { AxiomCloudUrl, printInitializationError } from './shared';
 
 const Version = require('../package.json').version;
 
@@ -36,7 +37,18 @@ export function otelTracerProvider(
   return provider;
 }
 
-export function otelTraceExporter(axiomUrl: string, axiomToken: string) {
+export function otelTraceExporter(axiomUrl: string = '', axiomToken: string = '') {
+  if (!axiomUrl || !axiomToken) {
+    axiomToken = process.env.AXIOM_TOKEN || '';
+    axiomUrl = process.env.AXIOM_URL || AxiomCloudUrl;
+  }
+
+  // if failed to retreive the token, exit
+  if (!axiomToken) {
+    printInitializationError();
+    return new OTLPTraceExporter();
+  }
+
   return new OTLPTraceExporter({
     url: axiomUrl + '/api/v1/traces',
     headers: {

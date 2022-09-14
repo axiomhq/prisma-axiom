@@ -9,7 +9,7 @@ import { PrismaInstrumentation } from '@prisma/instrumentation';
 import { otelTraceExporter } from 'prisma-axiom';
 
 // create axiom exporter
-const exporter = otelTraceExporter(process.env.AXIOM_URL || '', process.env.AXIOM_TOKEN || '');
+const exporter = otelTraceExporter();
 // setup otel provider
 const provider = new NodeTracerProvider({
   resource: new Resource({
