@@ -5,7 +5,6 @@ import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-base';
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node';
 import { PrismaInstrumentation } from '@prisma/instrumentation';
 import { Resource } from '@opentelemetry/resources';
-import { trace } from '@opentelemetry/api';
 import { AxiomCloudUrl, printInitializationError } from './shared';
 
 const Version = require('../package.json').version;
@@ -25,10 +24,6 @@ export function axiomTracerProvider(
   });
 
   provider.addSpanProcessor(new BatchSpanProcessor(exporter));
-
-  if (trace.setGlobalTracerProvider(provider) == false) {
-    provider.register();
-  }
 
   registerInstrumentations({
     tracerProvider: provider,
