@@ -33,8 +33,8 @@ generator client {
 
 ## Kitchen Sink Full Configuration
 
-Import and use `withAxiom` function to automatically setup & configure opentelemtry
-with `PrismaInstrumentation` to your axiom dashboard.
+Import and use `withAxiom` to automatically setup & configure OpenTelemetry
+with the Prisma instrumentation sending traces to Axiom.
 
 You can configure `prisma-axiom` by passing an options object as the second
 parameter to `withAxiom`.
@@ -51,15 +51,17 @@ const prisma = withAxiom(new PrismaClient(), {
 
 #### Custom Configuration
 
-When you need setup your opentelemetry setup you can use axiom's exporter,
-define axiom's exporter and attach it to the provider. You can checkout the [extends-otel example](./examples/extend-otel/index.ts)
-for more details.
+When you have your OpenTelemetry setup you can use the Axiom's exporter, and 
+attach it to the provider. 
+See the [extend-otel example](./examples/extend-otel/index.ts) for more details.
 
-The exporter can automatically retreive axiom url and token for environment variables `AXIOM_URL` and `AXIOM_TOKEN` respectively,
-or values could be passed as parameters.
+The exporter can automatically retreive the Axiom token and url variables from `AXIOM_URL` and `AXIOM_TOKEN` respectively, but they can also be passed as
+parameters.
+
+This is what it could look like:
 
 ```ts
-import { otelTraceExporter } from 'prisma-axiom';
+import { axiomTraceExporter } from 'prisma-axiom';
 
 const provider = new NodeTracerProvider({
   resource: new Resource({
@@ -69,7 +71,7 @@ const provider = new NodeTracerProvider({
 })
 
 // create axiom's exporter object and add a new span processor:
-const exporter = otelTraceExporter();
+const exporter = axiomTraceExporter();
 provider.addSpanProcessor(new BatchSpanProcessor(exporter));
 provider.register()
 

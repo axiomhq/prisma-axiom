@@ -1,11 +1,11 @@
 import { trace } from '@opentelemetry/api';
 import { InstrumentationOption } from '@opentelemetry/instrumentation';
-import { otelTracerProvider } from './otel';
+import { axiomTracerProvider } from './otel';
 import { PrismaClient } from '@prisma/client';
 import { AxiomCloudUrl, printInitializationError } from './shared';
 
 // Re-export for advanced configuration
-export { otelTracerProvider, otelTraceExporter } from './otel';
+export { axiomTracerProvider, axiomTraceExporter } from './otel';
 
 interface AxiomConfig {
   axiomToken?: string;
@@ -30,7 +30,7 @@ export default function withAxiom(prisma: PrismaClient, config: AxiomConfig = de
     return prisma;
   }
 
-  const provider = otelTracerProvider(config.axiomToken, config.axiomUrl, config.additionalInstrumentations || []);
+  const provider = axiomTracerProvider(config.axiomToken, config.axiomUrl, config.additionalInstrumentations || []);
 
   // Register provider
   trace.setGlobalTracerProvider(provider);

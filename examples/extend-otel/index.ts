@@ -6,10 +6,10 @@ import { PrismaClient } from '@prisma/client';
 import { registerInstrumentations } from '@opentelemetry/instrumentation';
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
 import { PrismaInstrumentation } from '@prisma/instrumentation';
-import { otelTraceExporter } from 'prisma-axiom';
+import { axiomTraceExporter } from 'prisma-axiom';
 
 // create axiom exporter
-const exporter = otelTraceExporter();
+const exporter = axiomTraceExporter();
 // setup otel provider
 const provider = new NodeTracerProvider({
   resource: new Resource({

@@ -10,12 +10,12 @@ import { AxiomCloudUrl, printInitializationError } from './shared';
 
 const Version = require('../package.json').version;
 
-export function otelTracerProvider(
+export function axiomTracerProvider(
   axiomToken: string,
   axiomUrl: string,
   additionalInstrumentations: InstrumentationOption[]
 ): NodeTracerProvider {
-  const exporter = otelTraceExporter(axiomUrl, axiomToken);
+  const exporter = axiomTraceExporter(axiomUrl, axiomToken);
 
   const provider = new NodeTracerProvider({
     resource: new Resource({
@@ -38,7 +38,7 @@ export function otelTracerProvider(
   return provider;
 }
 
-export function otelTraceExporter(axiomUrl: string = '', axiomToken: string = '') {
+export function axiomTraceExporter(axiomUrl: string = '', axiomToken: string = '') {
   if (!axiomUrl || !axiomToken) {
     axiomToken = process.env.AXIOM_TOKEN || '';
     axiomUrl = process.env.AXIOM_URL || AxiomCloudUrl;
