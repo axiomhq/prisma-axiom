@@ -1,12 +1,11 @@
 import { trace } from '@opentelemetry/api';
 import { InstrumentationOption } from '@opentelemetry/instrumentation';
-import { otelTracerProvider } from './otel';
+import { axiomTracerProvider } from './otel';
 import { PrismaClient } from '@prisma/client';
+import { AxiomCloudUrl, printInitializationError } from './shared';
 
 // Re-export for advanced configuration
-export { otelTracerProvider, otelTraceExporter } from './otel';
-
-const AxiomCloudUrl = 'https://cloud.axiom.co';
+export { axiomTracerProvider, axiomTraceExporter } from './otel';
 
 interface AxiomConfig {
   axiomToken?: string;
@@ -27,17 +26,21 @@ export default function withAxiom(prisma: PrismaClient, config: AxiomConfig = de
   config.axiomUrl = config.axiomUrl || AxiomCloudUrl;
 
   if (!config.axiomToken) {
-    console.error(
-      'axiom: Failed to initialize prisma-axiom, you need to set an Axiom API token with ingest permission'
-    );
+    printInitializationError();
     return prisma;
   }
 
-  const provider = otelTracerProvider(config.axiomToken, config.axiomUrl, config.additionalInstrumentations || []);
+  const provider = axiomTracerProvider(config.axiomToken, config.axiomUrl, config.additionalInstrumentations || []);
 
   // Register provider
-  trace.setGlobalTracerProvider(provider);
-  provider.register();
+  if (trace.setGlobalTracerProvider(provider) == false) {
+    provider.register();
+  } else {
+    console.warn('prisma-axiom: Failed to set global tracer provider.');
+    console.warn(
+      'prisma-axiom: Detected existing OTEL provider, see https://github.com/axiomhq/prisma-axiom#custom-configuration for advanced configuration'
+    );
+  }
 
   prisma.$on('beforeExit', async () => {
     await provider.shutdown();
