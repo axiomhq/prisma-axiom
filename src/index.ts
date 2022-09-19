@@ -36,8 +36,10 @@ export default function withAxiom(prisma: PrismaClient, config: AxiomConfig = de
   if (trace.setGlobalTracerProvider(provider) == false) {
     provider.register();
   } else {
-    console.warn("prisma-axiom: Failed to set global tracer provider.");
-    console.warn("prisma-axiom: Detected existing OTEL provider, see https://github.com/axiomhq/prisma-axiom#custom-configuration for advanced configuration");
+    console.warn('prisma-axiom: Failed to set global tracer provider.');
+    console.warn(
+      'prisma-axiom: Detected existing OTEL provider, see https://github.com/axiomhq/prisma-axiom#custom-configuration for advanced configuration'
+    );
   }
 
   prisma.$on('beforeExit', async () => {
