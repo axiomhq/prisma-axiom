@@ -33,7 +33,7 @@ export default function withAxiom(prisma: PrismaClient, config: AxiomConfig = de
   const provider = axiomTracerProvider(config.axiomToken, config.axiomUrl, config.additionalInstrumentations || []);
 
   // Register provider
-  if (trace.setGlobalTracerProvider(provider) == false) {
+  if (trace.setGlobalTracerProvider(provider)) {
     provider.register();
   } else {
     console.warn('prisma-axiom: Failed to set global tracer provider.');
