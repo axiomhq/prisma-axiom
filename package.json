@@ -2,6 +2,8 @@
   "name": "prisma-axiom",
   "description": "Axiom observability middleware for Prisma",
   "license": "MIT",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "dependencies": {
     "@opentelemetry/exporter-trace-otlp-proto": "^0.32.0",
     "@opentelemetry/instrumentation": "^0.32.0",
@@ -41,7 +43,6 @@
     "url": "https://github.com/axiomhq/prisma-axiom/issues"
   },
   "homepage": "https://github.com/axiomhq/prisma-axiom#readme",
-  "main": "index.ts",
   "scripts": {
     "build": "tsc",
     "prepare": "npm run build",
