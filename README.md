@@ -95,7 +95,7 @@ main().finally(async () => {
 
 #### Enable tracing preview in Prisma
 
-As tracing support for Prisma is [in preview](https://www.prisma.io/docs/concepts/components/preview-features/client-preview-features), you need to explicitly enable it. See [Quickstart](https://github.com/axiomhq/prisma-axiom#quickstart), step 3, `schema.prisma` has to be altered like this:
+As tracing support for Prisma is [in preview](https://www.prisma.io/docs/concepts/components/preview-features/client-preview-features), you need to explicitly enable it. See [Quickstart](https://github.com/axiomhq/prisma-axiom#quickstart) step 3, `schema.prisma` has to be altered like this:
 
 ```js
 generator client {
@@ -104,7 +104,7 @@ generator client {
 }
 ```
 
-Also note that this preview feature is only available starting Prisma v4.2.0.
+Also note that this preview feature is only available starting with Prisma v4.2.0.
 
 #### Disconnect prisma client
 
