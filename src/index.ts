@@ -1,10 +1,12 @@
-import { trace } from '@opentelemetry/api';
 import { InstrumentationOption } from '@opentelemetry/instrumentation';
-import { axiomTracerProvider } from './otel';
+import { NodeSDK } from '@opentelemetry/sdk-node';
+import { PrismaInstrumentation } from '@prisma/instrumentation';
+
+import { axiomTraceExporter } from './otel';
 import { AxiomCloudUrl, printInitializationError } from './shared';
 
 // Re-export for advanced configuration
-export { axiomTracerProvider, axiomTraceExporter } from './otel';
+export { axiomTraceExporter } from './otel';
 
 interface AxiomConfig {
   axiomToken?: string;
@@ -29,22 +31,18 @@ export default function withAxiom<T>(fn: (...args: any[]) => Promise<T>, config:
     return fn; // Return early if no token is provided.
   }
 
-  const provider = axiomTracerProvider(config.axiomToken, config.axiomUrl, config.additionalInstrumentations || []);
+  const sdk = new NodeSDK({
+    traceExporter: axiomTraceExporter(config.axiomUrl, config.axiomToken),
+    instrumentations: [
+      new PrismaInstrumentation(),
+      // TODO: Add config.additionalInstrumentations
+    ],
+  });
 
-  // Register provider
-  if (trace.setGlobalTracerProvider(provider)) {
-    provider.register();
-  } else {
-    console.warn('prisma-axiom: Failed to set global tracer provider.');
-    console.warn(
-      'prisma-axiom: Detected existing OTEL provider, see https://github.com/axiomhq/prisma-axiom#custom-configuration for advanced configuration'
-    );
-  }
-
-  // Execute the function, then shutdown the provider, then return the result.
   return async (...args: any[]) => {
-    const res = fn(...args);
-    await provider.shutdown();
+    await sdk.start()
+    const res = await fn(...args);
+    await sdk.shutdown();
     return res;
   }
 }

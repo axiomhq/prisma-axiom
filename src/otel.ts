@@ -1,37 +1,7 @@
-import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto';
-import { InstrumentationOption, registerInstrumentations } from '@opentelemetry/instrumentation';
-import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-base';
-import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node';
-import { PrismaInstrumentation } from '@prisma/instrumentation';
-import { Resource } from '@opentelemetry/resources';
 import { AxiomCloudUrl, printInitializationError } from './shared';
 
 const Version = require('../package.json').version;
-
-export function axiomTracerProvider(
-  axiomToken: string,
-  axiomUrl: string,
-  additionalInstrumentations: InstrumentationOption[]
-): NodeTracerProvider {
-  const exporter = axiomTraceExporter(axiomUrl, axiomToken);
-
-  const provider = new NodeTracerProvider({
-    resource: new Resource({
-      [SemanticResourceAttributes.SERVICE_NAME]: process.env.npm_package_name,
-      [SemanticResourceAttributes.SERVICE_VERSION]: process.env.npm_package_version,
-    }),
-  });
-
-  provider.addSpanProcessor(new BatchSpanProcessor(exporter));
-
-  registerInstrumentations({
-    tracerProvider: provider,
-    instrumentations: [new PrismaInstrumentation(), ...additionalInstrumentations],
-  });
-
-  return provider;
-}
 
 export function axiomTraceExporter(axiomUrl: string = '', axiomToken: string = '') {
   if (!axiomUrl || !axiomToken) {
