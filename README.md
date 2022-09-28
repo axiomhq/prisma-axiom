@@ -49,7 +49,7 @@ const prisma = withAxiom(new PrismaClient(), {
 });
 ```
 
-#### Custom Configuration
+### Custom Configuration
 
 When you have your OpenTelemetry setup you can use the Axiom's exporter, and 
 attach it to the provider. 
@@ -88,6 +88,27 @@ main().finally(async () => {
   await provider.shutdown()
 })
 ```
+
+## FAQ & Troubleshooting
+
+### I don't get any traces
+
+#### Enable tracing preview in Prisma
+
+As tracing support for Prisma is [in preview](https://www.prisma.io/docs/concepts/components/preview-features/client-preview-features), you need to explicitly enable it. See [Quickstart](https://github.com/axiomhq/prisma-axiom#quickstart) step 3, `schema.prisma` has to be altered like this:
+
+```js
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["tracing"]
+}
+```
+
+Also note that this preview feature is only available starting with Prisma v4.2.0.
+
+#### Disconnect prisma client
+
+Make sure to call `prisma.$disconnect()` after all your other code. If not doing so, Axiom will not receive any traces.
 
 ## License
 
