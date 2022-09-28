@@ -108,7 +108,7 @@ Also note that this preview feature is only available starting with Prisma v4.2.
 
 #### Disconnect prisma client
 
-Make sure to call `prisma.$disconnect()` which flushes all collected spans. If not doing so, Axiom will not receive any traces.
+Make sure to call `prisma.$disconnect()` after all your other code. If not doing so, Axiom will not receive any traces.
 
 ## License
 
