@@ -3,13 +3,14 @@ import { AxiomCloudUrl, printInitializationError } from './shared';
 
 const Version = require('../package.json').version;
 
-export function axiomTraceExporter(axiomUrl: string = '', axiomToken: string = '') {
-  if (!axiomUrl || !axiomToken) {
-    axiomToken = process.env.AXIOM_TOKEN || '';
+export function axiomTraceExporter(axiomToken?: string, axiomUrl?: string) {
+  if (!axiomToken) {
+    axiomToken = process.env.AXIOM_TOKEN;
+  }
+  if (!axiomUrl) {
     axiomUrl = process.env.AXIOM_URL || AxiomCloudUrl;
   }
 
-  // if failed to retreive the token, exit
   if (!axiomToken) {
     printInitializationError();
     return new OTLPTraceExporter();
