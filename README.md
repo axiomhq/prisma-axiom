@@ -10,11 +10,18 @@ Axiom observability middleware for Prisma.
 npm install --save prisma-axiom
 ```
 
-2. Add the following where you initialize your Prisma client:
+2. Wrap your main functions in `withAxiom` to automatically set up telemetry
+   and flush traces before exit.
 
 ```ts
 import withAxiom from 'prisma-axiom';
-const prisma = withAxiom(new PrismaClient());
+const prisma = new PrismaClient();
+
+async function main() {
+  // do something with prisma
+}
+
+withAxiom(main)() // wrap function 
 ```
 
 > **Note**: This will configure Axiom from the `AXIOM_TOKEN` and other 
@@ -42,7 +49,7 @@ parameter to `withAxiom`.
 This snippet shows all available options:
 
 ```ts
-const prisma = withAxiom(new PrismaClient(), {
+const myFn = withAxiom(myFn, {
   axiomToken:                 "xaat-xxxxx",
   axiomUrl:                   "https://my-axiom.example.org",
   additionalInstrumentations: [new HttpInstrumentation()] // add more instrumentations to the tracing setup
@@ -105,10 +112,6 @@ generator client {
 ```
 
 Also note that this preview feature is only available starting with Prisma v4.2.0.
-
-#### Disconnect prisma client
-
-Make sure to call `prisma.$disconnect()` after all your other code. If not doing so, Axiom will not receive any traces.
 
 ## License
 

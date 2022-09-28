@@ -1,7 +1,6 @@
 import { trace } from '@opentelemetry/api';
 import { InstrumentationOption } from '@opentelemetry/instrumentation';
 import { axiomTracerProvider } from './otel';
-import { PrismaClient } from '@prisma/client';
 import { AxiomCloudUrl, printInitializationError } from './shared';
 
 // Re-export for advanced configuration
@@ -19,7 +18,7 @@ const defaultConfig: AxiomConfig = {
   additionalInstrumentations: [],
 };
 
-export default function withAxiom(prisma: PrismaClient, config: AxiomConfig = defaultConfig): PrismaClient {
+export default function withAxiom<T>(fn: (...args: any[]) => Promise<T>, config: AxiomConfig = defaultConfig): (...args: any[]) => Promise<T> {
   // Merge provided config with default config to fall back to environment
   // variables if not provided.
   config = { ...defaultConfig, ...config };
@@ -27,7 +26,7 @@ export default function withAxiom(prisma: PrismaClient, config: AxiomConfig = de
 
   if (!config.axiomToken) {
     printInitializationError();
-    return prisma;
+    return fn; // Return early if no token is provided.
   }
 
   const provider = axiomTracerProvider(config.axiomToken, config.axiomUrl, config.additionalInstrumentations || []);
@@ -42,9 +41,10 @@ export default function withAxiom(prisma: PrismaClient, config: AxiomConfig = de
     );
   }
 
-  prisma.$on('beforeExit', async () => {
+  // Execute the function, then shutdown the provider, then return the result.
+  return async (...args: any[]) => {
+    const res = fn(...args);
     await provider.shutdown();
-  });
-
-  return prisma;
+    return res;
+  }
 }
