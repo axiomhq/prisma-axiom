@@ -1,0 +1,11 @@
+version: "3"
+
+services:
+  postgres:
+    image: postgres:alpine
+    environment: 
+      POSTGRES_USER: axiom-prisma
+      POSTGRES_PASSWORD: axiom-prisma
+      POSTGRES_DB: axiom-prisma
+    ports:
+      - 5432:5432

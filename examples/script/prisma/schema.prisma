@@ -2,17 +2,13 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
   previewFeatures = ["tracing"]
 }
 
-// datasource db {
-//   provider = "sqlite"
-//   url      = "file:./test.db"
-// }
 datasource db {
   provider = "postgresql"
-  url      = "postgresql://axiom:axiom@localhost:5432/prisma"
+  url      = "postgresql://axiom-prisma:axiom-prisma@localhost:5432/axiom-prisma"
 }
 
 model User {

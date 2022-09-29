@@ -1,11 +1,14 @@
-import { trace } from '@opentelemetry/api';
 import { InstrumentationOption } from '@opentelemetry/instrumentation';
-import { axiomTracerProvider } from './otel';
-import { PrismaClient } from '@prisma/client';
+import { NodeSDK } from '@opentelemetry/sdk-node';
+import { PrismaInstrumentation } from '@prisma/instrumentation';
+import { Resource } from '@opentelemetry/resources';
+import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
+
+import { axiomTraceExporter } from './otel';
 import { AxiomCloudUrl, printInitializationError } from './shared';
 
 // Re-export for advanced configuration
-export { axiomTracerProvider, axiomTraceExporter } from './otel';
+export { axiomTraceExporter } from './otel';
 
 interface AxiomConfig {
   axiomToken?: string;
@@ -19,7 +22,10 @@ const defaultConfig: AxiomConfig = {
   additionalInstrumentations: [],
 };
 
-export default function withAxiom(prisma: PrismaClient, config: AxiomConfig = defaultConfig): PrismaClient {
+export default function withAxiom<T>(
+  fn: (...args: any[]) => Promise<T>,
+  config: AxiomConfig = defaultConfig
+): (...args: any[]) => Promise<T> {
   // Merge provided config with default config to fall back to environment
   // variables if not provided.
   config = { ...defaultConfig, ...config };
@@ -27,24 +33,31 @@ export default function withAxiom(prisma: PrismaClient, config: AxiomConfig = de
 
   if (!config.axiomToken) {
     printInitializationError();
-    return prisma;
+    return fn; // Return early if no token is provided.
   }
 
-  const provider = axiomTracerProvider(config.axiomToken, config.axiomUrl, config.additionalInstrumentations || []);
-
-  // Register provider
-  if (trace.setGlobalTracerProvider(provider)) {
-    provider.register();
-  } else {
-    console.warn('prisma-axiom: Failed to set global tracer provider.');
-    console.warn(
-      'prisma-axiom: Detected existing OTEL provider, see https://github.com/axiomhq/prisma-axiom#custom-configuration for advanced configuration'
-    );
+  let instrumentations: any[] = [new PrismaInstrumentation()]; // TODO: Remove any
+  if (config.additionalInstrumentations) {
+    instrumentations.concat(config.additionalInstrumentations);
   }
 
-  prisma.$on('beforeExit', async () => {
-    await provider.shutdown();
+  const sdk = new NodeSDK({
+    traceExporter: axiomTraceExporter(config.axiomToken, config.axiomUrl),
+    instrumentations,
   });
 
-  return prisma;
+  // Add service name + version attributes
+  sdk.addResource(
+    new Resource({
+      [SemanticResourceAttributes.SERVICE_NAME]: process.env.npm_package_name,
+      [SemanticResourceAttributes.SERVICE_VERSION]: process.env.npm_package_version,
+    })
+  );
+
+  return async (...args: any[]) => {
+    await sdk.start();
+    const res = await fn(...args);
+    await sdk.shutdown();
+    return res;
+  };
 }

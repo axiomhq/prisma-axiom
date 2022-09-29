@@ -2,24 +2,19 @@ import withAxiom from 'prisma-axiom';
 import { PrismaClient } from '@prisma/client';
 
 const client = new PrismaClient();
-const prisma = withAxiom(client);
 
 async function main() {
-  await prisma.user.create({
+  await client.user.create({
     data: {
       name: 'Alice',
       email: 'alice@prisma.io',
     },
   });
 
-  const user = await prisma.user.findFirst();
+  const user = await client.user.findFirst();
   console.log('new user created', user);
 
-  await prisma.user.deleteMany();
-
+  await client.user.deleteMany();
 }
 
-main().finally(async () => {
-  console.log('disconnect prisma')
-  await prisma.$disconnect()
-})
+withAxiom(main)()
