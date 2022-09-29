@@ -22,7 +22,10 @@ const defaultConfig: AxiomConfig = {
   additionalInstrumentations: [],
 };
 
-export default function withAxiom<T>(fn: (...args: any[]) => Promise<T>, config: AxiomConfig = defaultConfig): (...args: any[]) => Promise<T> {
+export default function withAxiom<T>(
+  fn: (...args: any[]) => Promise<T>,
+  config: AxiomConfig = defaultConfig
+): (...args: any[]) => Promise<T> {
   // Merge provided config with default config to fall back to environment
   // variables if not provided.
   config = { ...defaultConfig, ...config };
@@ -39,7 +42,7 @@ export default function withAxiom<T>(fn: (...args: any[]) => Promise<T>, config:
   }
 
   const sdk = new NodeSDK({
-    traceExporter: axiomTraceExporter(config.axiomUrl, config.axiomToken),
+    traceExporter: axiomTraceExporter(config.axiomToken, config.axiomUrl),
     instrumentations,
   });
 
@@ -52,9 +55,9 @@ export default function withAxiom<T>(fn: (...args: any[]) => Promise<T>, config:
   );
 
   return async (...args: any[]) => {
-    await sdk.start()
+    await sdk.start();
     const res = await fn(...args);
     await sdk.shutdown();
     return res;
-  }
+  };
 }

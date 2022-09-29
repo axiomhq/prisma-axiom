@@ -4,7 +4,7 @@
   "description": "example on using prisma-axiom in a script",
   "main": "index.ts",
   "scripts": {
-    "start": "ts-node index.ts"
+    "start": "cd ../.. && npm run build && cd - && prisma generate && prisma migrate dev --name init && ts-node index.ts"
   },
   "dependencies": {
     "@prisma/client": "^4.2.1",
