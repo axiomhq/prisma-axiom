@@ -56,8 +56,14 @@ export default function withAxiom<T>(
 
   return async (...args: any[]) => {
     await sdk.start();
-    const res = await fn(...args);
-    await sdk.shutdown();
-    return res;
+
+    try {
+      const res = await fn(...args);
+      await sdk.shutdown();
+      return res;
+    } catch (err) {
+      await sdk.shutdown();
+      throw err;
+    }
   };
 }
