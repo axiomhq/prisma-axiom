@@ -1,17 +1,36 @@
-# prisma-axiom [![CI](https://github.com/axiomhq/prisma-axiom/actions/workflows/ci.yml/badge.svg)](https://github.com/axiomhq/prisma-axiom/actions/workflows/ci.yml)
+![prisma-axiom: The official Prisma integration for Axiom](.github/images/banner-dark.svg#gh-dark-mode-only)
+![prisma-axiom: The official Prisma integration for Axiom](.github/images/banner-light.svg#gh-light-mode-only)
 
-Axiom observability middleware for Prisma.
+<div align="center">
 
-## Quickstart
+[![Workflow][workflow_badge]][workflow]
+[![Latest Release][release_badge]][release]
+[![License][license_badge]][license]
 
-1. Install prisma-axiom
+</div>
+
+[Axiom](https://axiom.co) unlocks observability at any scale.
+
+- **Ingest with ease, store without limits:** Axiom’s next-generation datastore enables ingesting petabytes of data with ultimate efficiency. Ship logs from Kubernetes, AWS, Azure, Google Cloud, DigitalOcean, Nomad, and others.
+- **Query everything, all the time:** Whether DevOps, SecOps, or EverythingOps, query all your data no matter its age. No provisioning, no moving data from cold/archive to “hot”, and no worrying about slow queries. All your data, all. the. time.
+- **Powerful dashboards, for continuous observability:** Build dashboards to collect related queries and present information that’s quick and easy to digest for you and your team. Dashboards can be kept private or shared with others, and are the perfect way to bring together data from different sources
+
+For more information check out the [official documentation](https://axiom.co/docs).
+
+## Usage
+
+Install prisma-axiom
 
 ```shell
 npm install --save prisma-axiom
 ```
 
-2. Wrap your main functions in `withAxiom` to automatically set up telemetry
-   and flush traces before exit.
+If you use the [Axiom CLI](https://github.com/axiomhq/cli), run `eval $(axiom config export -f)` to configure your environment variables.
+
+Otherwise create a personal token in [the Axiom settings](https://cloud.axiom.co/settings/profile) and export it as `AXIOM_TOKEN`. Set `AXIOM_ORG_ID` to the organization ID from the settings page of the organization you want to access.
+
+Wrap your main functions in `withAxiom` to automatically set up telemetry and 
+flush traces before exit:
 
 ```ts
 import withAxiom from 'prisma-axiom';
@@ -24,12 +43,7 @@ async function main() {
 withAxiom(main)() // wrap function 
 ```
 
-> **Note**: This will configure Axiom from the `AXIOM_TOKEN` and other 
-> environment variables. Check out the
-> [Kitchen Sink Full Configuration](#kitchen-sink-full-configuration) for more
-> advanced configuration.
-
-3. Enable the prisma tracing preview feature in `schema.prisma` like this:
+Enable the prisma tracing preview feature in `schema.prisma` like this:
 
 ```js
 generator client {
@@ -38,85 +52,17 @@ generator client {
 }
 ```
 
-## Kitchen Sink Full Configuration
-
-Import and use `withAxiom` to automatically setup & configure OpenTelemetry
-with the Prisma instrumentation sending traces to Axiom.
-
-You can configure `prisma-axiom` by passing an options object as the second
-parameter to `withAxiom`.
-
-This snippet shows all available options:
-
-```ts
-const myFn = withAxiom(myFn, {
-  axiomToken:                 "xaat-xxxxx",
-  axiomUrl:                   "https://my-axiom.example.org",
-  additionalInstrumentations: [new HttpInstrumentation()] // add more instrumentations to the tracing setup
-});
-```
-
-### Custom Configuration
-
-When you have your OpenTelemetry setup you can use the Axiom's exporter, and 
-attach it to the provider. 
-See the [extend-otel example](./examples/extend-otel/index.ts) for more details.
-
-The exporter can automatically retreive the Axiom token and url variables from `AXIOM_URL` and `AXIOM_TOKEN` respectively, but they can also be passed as
-parameters.
-
-This is what it could look like:
-
-```ts
-import { axiomTraceExporter } from 'prisma-axiom';
-
-const provider = new NodeTracerProvider({
-  resource: new Resource({
-    [SemanticResourceAttributes.SERVICE_NAME]: process.env.npm_package_name,
-    [SemanticResourceAttributes.SERVICE_VERSION]: process.env.npm_package_version,
-  }),
-})
-
-// create axiom's exporter object and add a new span processor:
-const exporter = axiomTraceExporter();
-provider.addSpanProcessor(new BatchSpanProcessor(exporter));
-provider.register()
-
-registerInstrumentations({
-  instrumentations: [new PrismaInstrumentation(), new HttpInstrumentation()],
-});
-
-function main () {
-  // ...
-}
-
-// shutdown the provider to ensure delivery
-main().finally(async () => {
-  await provider.shutdown()
-})
-```
-
-## FAQ & Troubleshooting
-
-### I don't get any traces
-
-#### Enable tracing preview in Prisma
-
-As tracing support for Prisma is [in preview](https://www.prisma.io/docs/concepts/components/preview-features/client-preview-features), you need to explicitly enable it. See [Quickstart](https://github.com/axiomhq/prisma-axiom#quickstart) step 3, `schema.prisma` has to be altered like this:
-
-```js
-generator client {
-  provider        = "prisma-client-js"
-  previewFeatures = ["tracing"]
-}
-```
-
-Also note that this preview feature is only available starting with Prisma v4.2.0.
+For further examples, head over to the [examples](examples) directory.
 
 ## License
 
-&copy; Axiom, Inc., 2022
+Distributed under the [MIT License](LICENSE).
 
-Distributed under MIT License (`The MIT License`).
+<!-- Badges -->
 
-See [LICENSE](LICENSE) for more information.
+[workflow]: https://github.com/axiomhq/prisma-axiom/actions/workflows/push.yml
+[workflow_badge]: https://img.shields.io/github/workflow/status/axiomhq/prisma-axiom/CI?ghcache=unused
+[release]: https://github.com/axiomhq/prisma-axiom/releases/latest
+[release_badge]: https://img.shields.io/github/release/axiomhq/prisma-axiom.svg?ghcache=unused
+[license]: https://opensource.org/licenses/MIT
+[license_badge]: https://img.shields.io/github/license/axiomhq/prisma-axiom.svg?color=blue&ghcache=unused
